@@ -1,10 +1,13 @@
+// lib/domain/repository/nation_repository.dart
+
 import '../entities/nation.dart';
 
-/// SECTION: Định nghĩa contract cho Nation Repository
+/// SECTION: Interface NationRepository
+/// NOTE: Interface định nghĩa các phương thức cần thiết cho repository.
 abstract class NationRepository {
-  /// SECTION: Lấy danh sách các quốc gia (theo phân trang) với logging
-  Future<List<NationEntity>> getNations({int offset = 0, int limit = 10}) {
-    print('🔄 [NationRepository] Gọi phương thức getNations với offset: $offset, limit: $limit');
-    throw UnimplementedError('Phương thức getNations chưa được triển khai');
-  }
+  /// ANCHOR: Lấy danh sách các quốc gia (với phân trang)
+  /// - offset: Vị trí bắt đầu phân trang.
+  /// - limit: Số lượng item tối đa cần lấy.
+  /// - Return: Danh sách các đối tượng `NationEntity`.
+  Future<List<NationEntity>> getNations({int offset = 0, int limit = 5});
 }

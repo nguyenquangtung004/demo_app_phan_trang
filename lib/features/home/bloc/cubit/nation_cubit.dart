@@ -1,64 +1,47 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
+// lib/features/home/bloc/cubit/nation_cubit.dart
 
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../domain/entities/nation.dart';
 import '../../../../domain/usecases/get_nation.dart';
+import 'nation_state.dart'; // LINK: Import file state riêng biệt
 
-abstract class NationState {}
-
-class NationInitial extends NationState {}
-
-class NationLoading extends NationState {
-  final List<NationEntity> nations;
-  NationLoading(this.nations);
-}
-
-class NationLoaded extends NationState {
-  final List<NationEntity> nations;
-  final bool hasMore;
-  NationLoaded(this.nations, {this.hasMore = true});
-}
-
-class NationError extends NationState {
-  final String message;
-  NationError(this.message);
-}
-
+/// SECTION: Cubit quản lý state và logic của quốc gia
 class NationCubit extends Cubit<NationState> {
+  // ANCHOR: Khai báo UseCase
   final GetNations getNations;
-  int _offset = 0;
-  final int _limit = 5;
-  bool _hasMore = true;
 
+  /// SECTION: Constructor - Khởi tạo Cubit và gọi dữ liệu ban đầu
   NationCubit({required this.getNations}) : super(NationInitial()) {
     loadNations();
   }
 
-  /// ✅ Tải dữ liệu phân trang
+  /// SECTION: Tải dữ liệu từ UseCase (Không chứa logic phân trang tại đây nữa)
   Future<void> loadNations() async {
-    if (!_hasMore) return;
+    // NOTE: Kiểm tra nếu không còn dữ liệu từ use case
+    if (!getNations.hasMoreData) {
+      emit(NationError("Không còn dữ liệu để tải."));
+      return;
+    }
+
+    // ANCHOR: Đẩy state loading (giữ lại dữ liệu cũ nếu có)
     emit(NationLoading(state is NationLoaded ? (state as NationLoaded).nations : []));
 
     try {
-      final nations = await getNations(offset: _offset, limit: _limit);
-      _offset += nations.length;
-      _hasMore = nations.length == _limit;
+      // ANCHOR: Gọi Use Case để fetch dữ liệu
+      final nations = await getNations.call();
 
-      final updatedNations = [
-        if (state is NationLoaded) ...(state as NationLoaded).nations,
-        ...nations
-      ];
-
-      emit(NationLoaded(updatedNations, hasMore: _hasMore));
+      // ✅ Phát state thành công nếu có dữ liệu
+      emit(NationLoaded(nations, hasMore: getNations.hasMoreData));
     } catch (e) {
+      // ERROR: Xử lý lỗi và phát state lỗi
       emit(NationError('Lỗi khi tải dữ liệu: $e'));
     }
   }
 
-  /// ✅ Làm mới dữ liệu khi kéo xuống
+  /// SECTION: Làm mới dữ liệu khi kéo xuống
   Future<void> resetPagination() async {
-    _offset = 0;
-    _hasMore = true;
-    emit(NationLoading([]));
-    await loadNations();
+    getNations.resetPagination(); // Gọi reset từ UseCase
+    emit(NationLoading([]));      // Phát loading state
+    await loadNations();          // Gọi lại dữ liệu từ đầu
   }
 }

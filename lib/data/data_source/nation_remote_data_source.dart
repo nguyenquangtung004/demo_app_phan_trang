@@ -1,8 +1,13 @@
+// lib/data/data_source/nation_remote_data_source.dart
+
 import 'package:dio/dio.dart';
 import '../../core/error/error.dart';
 import '../models/nation_model.dart';
 
+/// SECTION: NationRemoteDataSource
+/// NOTE: Class chịu trách nhiệm gọi API và xử lý dữ liệu thô từ server.
 class NationRemoteDataSource {
+  // ANCHOR: Khai báo đối tượng Dio để gọi API
   final Dio _dio = Dio(
     BaseOptions(
       baseUrl: 'https://restcountries.com/v3.1',
@@ -11,6 +16,7 @@ class NationRemoteDataSource {
     ),
   );
 
+  /// SECTION: Constructor - Thêm interceptor để xử lý lỗi và retry request
   NationRemoteDataSource() {
     _dio.interceptors.add(InterceptorsWrapper(
       onError: (DioException error, handler) async {
@@ -24,14 +30,15 @@ class NationRemoteDataSource {
     ));
   }
 
-  /// Fetch các quốc gia có chữ "B" và hỗ trợ phân trang (offset + limit)
+  /// SECTION: Fetch danh sách quốc gia từ API
+  /// - offset: Phân trang, vị trí bắt đầu
+  /// - limit: Giới hạn số lượng phần tử cần lấy
   Future<List<NationModel>> fetchNations({int offset = 0, int limit = 10}) async {
     try {
-      print('🔗 [DataSource] Đang gọi API để lọc quốc gia có chữ "B" với offset: $offset và limit: $limit...');
+      print('🔗 [DataSource] Đang gọi API để lọc quốc gia với offset: $offset và limit: $limit...');
       
-      // Gọi API chỉ lấy tên và cờ
+      // ANCHOR: Gọi API lấy dữ liệu quốc gia
       final response = await _dio.get('/all?fields=name,flags');
-      // final response = await _dio.get('/region/europe?fields=name,flags');
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
@@ -49,20 +56,23 @@ class NationRemoteDataSource {
         }
 
         final paginatedData = filteredData.skip(offset).take(limit).toList();
+
         print('✅ [DataSource] Dữ liệu lọc & phân trang: ${paginatedData.length} quốc gia.');
 
-        // ✅ Chuyển đổi từ JSON sang NationModel
+        // ANCHOR: Chuyển đổi từ JSON sang NationModel
         return paginatedData.map((nation) => NationModel.fromJson(nation)).toList();
       } else {
-        throw Exception('❌ [DataSource] HTTP Error: ${response.statusCode}');
+        // ERROR: Nếu lỗi từ HTTP
+        throw _handleHttpError(response.statusCode);
       }
-    } catch (e) {
-      print('❌ [DataSource] Lỗi khi fetch dữ liệu từ server: $e');
-      throw Exception('Lỗi khi lấy dữ liệu từ server: $e');
+    } catch (error) {
+      // ERROR: Xử lý lỗi chung từ Dio và ném ra lỗi cụ thể
+      print('❌ [DataSource] Lỗi khi fetch dữ liệu từ server: $error');
+      throw _mapDioError(error as DioException);
     }
   }
 
-  /// Xử lý lỗi HTTP
+  /// SECTION: Xử lý lỗi HTTP từ server (400, 404, 500)
   Exception _handleHttpError(int? statusCode) {
     switch (statusCode) {
       case 400:
@@ -76,13 +86,15 @@ class NationRemoteDataSource {
     }
   }
 
-  /// Xử lý lỗi DioException
+  /// SECTION: Xử lý lỗi DioException (lỗi kết nối mạng và timeout)
   Exception _mapDioError(DioException error) {
     switch (error.type) {
       case DioExceptionType.connectionTimeout:
         return NetworkException('Kết nối đến server quá lâu');
       case DioExceptionType.receiveTimeout:
         return NetworkException('Server phản hồi quá lâu');
+      case DioExceptionType.badResponse:
+        return BadRequestException('Phản hồi không hợp lệ từ server');
       default:
         return UnknownException('Lỗi không xác định: ${error.message}');
     }
