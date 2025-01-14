@@ -3,8 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
 import '../bloc/cubit/nation_cubit.dart';
 import '../bloc/cubit/nation_state.dart';
+import '../wigets/shimmer_card_widget.dart';
 
-/// ANCHOR: NationScreen - Màn hình chính hiển thị danh sách quốc gia
+// ANCHOR: NationScreen - Màn hình chính hiển thị danh sách quốc gia
 class NationScreen extends StatefulWidget {
   const NationScreen({super.key});
 
@@ -12,7 +13,7 @@ class NationScreen extends StatefulWidget {
   State<NationScreen> createState() => _NationScreenState();
 }
 
-/// SECTION: State quản lý logic cuộn và tải dữ liệu
+// SECTION: State quản lý logic cuộn và tải dữ liệu
 class _NationScreenState extends State<NationScreen> {
   late ScrollController _scrollController;
   bool _isLoadingMore = false; // Cờ kiểm tra trạng thái tải dữ liệu
@@ -23,7 +24,7 @@ class _NationScreenState extends State<NationScreen> {
     _scrollController = ScrollController()..addListener(_onScroll);
   }
 
-  /// SECTION: Cuộn tới cuối danh sách để tải thêm dữ liệu
+  // SECTION: Cuộn tới cuối danh sách để tải thêm dữ liệu
   void _onScroll() async {
     if (_scrollController.position.pixels >=
             _scrollController.position.maxScrollExtent - 100 &&
@@ -35,12 +36,12 @@ class _NationScreenState extends State<NationScreen> {
     }
   }
 
-  /// SECTION: Kéo từ đầu trang để làm mới dữ liệu
+  // SECTION: Kéo từ đầu trang để làm mới dữ liệu
   Future<void> _onRefresh() async {
     context.read<NationCubit>().resetPagination();
   }
 
-  /// ANCHOR: Build chính của Widget
+  // ANCHOR: Build chính của Widget
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,7 +73,7 @@ class _NationScreenState extends State<NationScreen> {
     );
   }
 
-  /// SECTION: Danh sách quốc gia
+  // SECTION: Danh sách quốc gia
   Widget _buildNationList(List<dynamic> nations, bool hasMore) {
     return ListView.builder(
       controller: _scrollController,
@@ -153,40 +154,3 @@ class _NationScreenState extends State<NationScreen> {
   }
 }
 
-/// ✅ Widget ShimmerCard cho hiệu ứng loading
-class ShimmerCard extends StatelessWidget {
-  const ShimmerCard({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.white,
-      child: Card(
-        margin: const EdgeInsets.all(10),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        elevation: 5,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                color: Colors.grey,
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Container(height: 20, width: 120, color: Colors.grey),
-            const SizedBox(height: 5),
-            Container(height: 20, width: 150, color: Colors.grey),
-            const SizedBox(height: 10),
-          ],
-        ),
-      ),
-    );
-  }
-}

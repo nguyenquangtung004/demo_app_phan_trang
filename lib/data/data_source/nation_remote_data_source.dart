@@ -4,19 +4,19 @@ import 'package:dio/dio.dart';
 import '../../core/error/error.dart';
 import '../models/nation_model.dart';
 
-/// SECTION: NationRemoteDataSource
-/// NOTE: Class chịu trách nhiệm gọi API và xử lý dữ liệu thô từ server.
+// SECTION: NationRemoteDataSource
+// NOTE: Class chịu trách nhiệm gọi API và xử lý dữ liệu thô từ server.
 class NationRemoteDataSource {
   // ANCHOR: Khai báo đối tượng Dio để gọi API
   final Dio _dio = Dio(
     BaseOptions(
       baseUrl: 'https://restcountries.com/v3.1',
-      connectTimeout: Duration(seconds: 120),
-      receiveTimeout: Duration(seconds: 120),
+      connectTimeout: Duration(seconds: 120),//NOTE : Thời gian kết nối tối đa
+      receiveTimeout: Duration(seconds: 120),//NOTE : Thời Gian Nhận Dữ Liệu Tối Đa
     ),
   );
 
-  /// SECTION: Constructor - Thêm interceptor để xử lý lỗi và retry request
+  // SECTION: Constructor - Thêm interceptor để xử lý lỗi và retry request
   NationRemoteDataSource() {
     _dio.interceptors.add(InterceptorsWrapper(
       onError: (DioException error, handler) async {
@@ -33,7 +33,7 @@ class NationRemoteDataSource {
   /// SECTION: Fetch danh sách quốc gia từ API
   /// - offset: Phân trang, vị trí bắt đầu
   /// - limit: Giới hạn số lượng phần tử cần lấy
-  Future<List<NationModel>> fetchNations({int offset = 0, int limit = 10}) async {
+  Future<List<NationModel>> fetchNations({int offset = 0, int limit = 5}) async {
     try {
       print('🔗 [DataSource] Đang gọi API để lọc quốc gia với offset: $offset và limit: $limit...');
       

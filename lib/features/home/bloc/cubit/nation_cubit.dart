@@ -5,17 +5,17 @@ import '../../../../domain/entities/nation.dart';
 import '../../../../domain/usecases/get_nation.dart';
 import 'nation_state.dart'; // LINK: Import file state riêng biệt
 
-/// SECTION: Cubit quản lý state và logic của quốc gia
+// SECTION: Cubit quản lý state và logic của quốc gia
 class NationCubit extends Cubit<NationState> {
   // ANCHOR: Khai báo UseCase
   final GetNations getNations;
 
-  /// SECTION: Constructor - Khởi tạo Cubit và gọi dữ liệu ban đầu
+  // SECTION: Constructor - Khởi tạo Cubit và gọi dữ liệu ban đầu
   NationCubit({required this.getNations}) : super(NationInitial()) {
     loadNations();
   }
 
-  /// SECTION: Tải dữ liệu từ UseCase (Không chứa logic phân trang tại đây nữa)
+  // SECTION: Tải dữ liệu từ UseCase (Không chứa logic phân trang tại đây nữa)
   Future<void> loadNations() async {
     // NOTE: Kiểm tra nếu không còn dữ liệu từ use case
     if (!getNations.hasMoreData) {
@@ -38,7 +38,7 @@ class NationCubit extends Cubit<NationState> {
     }
   }
 
-  /// SECTION: Làm mới dữ liệu khi kéo xuống
+  // SECTION: Làm mới dữ liệu khi kéo xuống
   Future<void> resetPagination() async {
     getNations.resetPagination(); // Gọi reset từ UseCase
     emit(NationLoading([]));      // Phát loading state

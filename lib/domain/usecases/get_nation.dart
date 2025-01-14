@@ -11,15 +11,14 @@ class GetNations {
   // ANCHOR: Khai báo repository và thuộc tính phân trang
   final NationRepository repository;
 
-  /// ✅ Tách biệt logic phân trang (Clean hơn)
   int _offset = 0;
   final int _limit = 5;
   bool _hasMore = true;
 
-  /// SECTION: Constructor - Inject repository từ bên ngoài (Dependency Injection)
+  // SECTION: Constructor - Inject repository từ bên ngoài (Dependency Injection)
   GetNations({required this.repository});
 
-  /// SECTION: Phương thức call để gọi use case với phân trang
+  // SECTION: Phương thức call để gọi use case với phân trang
   Future<List<NationEntity>> call() async {
     if (!_hasMore) {
       print('⚠️ [GetNations] Không còn dữ liệu để tải.');
@@ -33,7 +32,10 @@ class GetNations {
       print('✅ [GetNations] Dữ liệu lấy thành công. Số lượng: ${nations.length}');
 
       // ANCHOR: Cập nhật offset và kiểm tra còn dữ liệu không
+      // NOTE: Tăng giá trị offset sau mỗi lần fetch dữ liệu.
       _offset += nations.length;
+      //NOTE: Nếu số lượng dữ liệu trả về nhỏ hơn _limit, đánh dấu hết dữ liệu (_hasMore = false).
+      //NOTE: Nếu đúng bằng _limit, có thể còn dữ liệu để tải (_hasMore = true).
       _hasMore = nations.length == _limit;
 
       return nations;
@@ -44,13 +46,13 @@ class GetNations {
     }
   }
 
-  /// SECTION: Reset phân trang khi làm mới dữ liệu
+  // SECTION: Reset phân trang khi làm mới dữ liệu
   void resetPagination() {
     _offset = 0;
     _hasMore = true;
     print('🔄 [GetNations] Reset phân trang về giá trị ban đầu.');
   }
 
-  /// ✅ Getter kiểm tra còn dữ liệu hay không
+  //NOTE: ✅ Getter kiểm tra còn dữ liệu hay không
   bool get hasMoreData => _hasMore;
 }
