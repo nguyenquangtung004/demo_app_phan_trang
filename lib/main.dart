@@ -12,14 +12,6 @@ void main() async{
     remoteDataSource: NationRemoteDataSource(),
   );
 
-  //   final dio = Dio(BaseOptions(baseUrl: 'https://restcountries.com/v3.1'));
-  // try {
-  //   final response = await dio.get('/all?offset=1&limit=5');
-  //   print('✅ Kết nối API thành công: Nhận ${response.data.length} quốc gia.');
-  // } catch (e) {
-  //   print('❌ Không thể kết nối API: $e');
-  // }
-
   runApp(
     MultiBlocProvider(
       providers: [
